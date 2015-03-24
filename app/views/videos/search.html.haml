@@ -1,0 +1,4 @@
+%article.video_category
+  .videos.row
+    - @videos.each do |video|
+      = render "video", video: video
