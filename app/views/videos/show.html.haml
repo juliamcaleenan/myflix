@@ -29,7 +29,7 @@
       %header
         %h3= "User Reviews (#{@reviews.count})"
       %ul
-        - @reviews.reload.each do |review|
+        - @reviews.each do |review|
           %article.review
             %li.row
               .col-sm-2

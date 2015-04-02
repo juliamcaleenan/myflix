@@ -10,10 +10,6 @@ class Video < ActiveRecord::Base
   end
 
   def average_rating
-    sum = 0
-    count = reviews.count.to_f
-    reviews.all.each { |review| sum += review.rating }
-    average = sum / count
-    average.round(1)
+    reviews.average(:rating).round(1) if reviews.count > 0
   end
 end

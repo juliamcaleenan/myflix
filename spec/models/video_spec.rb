@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Video do
 
   it { should belong_to(:category) }
-  it { should have_many(:reviews).order("created_at DESC")}
+  it { should have_many(:reviews).order("created_at DESC") }
   it { should validate_presence_of(:title) }
   it { should validate_presence_of(:description) }
 
@@ -40,11 +40,11 @@ describe Video do
   end
 
   describe "#average_rating" do
-    it "calculates the average rating of a video (from its reviews) rounded to 1 decimal place" do
+    it "calculates the average rating of a video from its reviews rounded to 1 decimal place" do
       video = Fabricate(:video)
-      video.reviews << Fabricate(:review, rating: 5)
-      video.reviews << Fabricate(:review, rating: 4)
-      video.reviews << Fabricate(:review, rating: 4)
+      Fabricate(:review, rating: 5, video: video)
+      Fabricate(:review, rating: 4, video: video)
+      Fabricate(:review, rating: 4, video: video)
       expect(video.average_rating).to eq(4.3)
     end
   end

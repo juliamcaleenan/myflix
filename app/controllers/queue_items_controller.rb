@@ -2,7 +2,7 @@ class QueueItemsController < ApplicationController
   before_action :require_user
 
   def index
-    @queue_items = current_user.queue_items.order(:position)
+    @queue_items = current_user.queue_items
   end
 
   def create
@@ -25,7 +25,7 @@ class QueueItemsController < ApplicationController
   end
 
   def update_queue_items_positions
-    queue_items = current_user.queue_items.order(:position)
+    queue_items = current_user.queue_items
     queue_items.each_with_index do |queue_item, index|
       queue_item.update(position: index + 1)
     end
