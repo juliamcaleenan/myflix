@@ -39,7 +39,7 @@ describe Video do
     end
   end
 
-  describe "average_rating" do
+  describe "#average_rating" do
     it "calculates the average rating of a video (from its reviews) rounded to 1 decimal place" do
       video = Fabricate(:video)
       video.reviews << Fabricate(:review, rating: 5)
