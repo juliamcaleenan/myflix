@@ -51,8 +51,8 @@ describe ReviewsController do
       end
 
       it "sets the @reviews variable" do
-        review1 = Fabricate(:review, video: video)
-        review2 = Fabricate(:review, video: video)
+        review1 = Fabricate(:review, video: video, user: Fabricate(:user))
+        review2 = Fabricate(:review, video: video, user: Fabricate(:user))
         post :create, video_id: video.id, review: { rating: 5 }
         expect(assigns(:reviews)).to match_array([review1, review2])
       end

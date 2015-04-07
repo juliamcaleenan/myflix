@@ -111,4 +111,70 @@ describe QueueItemsController do
     end
   end
 
+  describe "POST update_queue" do
+    let(:user) { Fabricate(:user) }
+    let(:video1) { Fabricate(:video) }
+    let(:video2) { Fabricate(:video) }
+    let(:video3) { Fabricate(:video) }
+    let(:queue_item1) { Fabricate(:queue_item, position: 1, video: video1, user: user) }
+    let(:queue_item2) { Fabricate(:queue_item, position: 2, video: video2, user: user) }
+    let(:queue_item3) { Fabricate(:queue_item, position: 3, video: video3, user: user) }
+
+    context "inputs are valid" do
+      before { session[:user_id] = user.id }
+
+      it "redirects to the my queue page" do
+        post :update_queue, queue_items: [{ id: queue_item1.id, position: 2 }, { id: queue_item2.id, position: 3 }, { id: queue_item3.id, position: 1 }]
+        expect(response).to redirect_to my_queue_path
+      end
+
+      it "reorders the queue items" do
+        post :update_queue, queue_items: [{ id: queue_item1.id, position: 2 }, { id: queue_item2.id, position: 3 }, { id: queue_item3.id, position: 1 }]
+        expect(user.queue_items).to eq([queue_item3, queue_item1, queue_item2])
+      end
+
+      it "normalizes the position numbers" do
+        post :update_queue, queue_items: [{ id: queue_item1.id, position: 4 }, { id: queue_item2.id, position: 2 }, { id: queue_item3.id, position: 3 }]
+        expect(user.queue_items.map(&:position)).to eq([1, 2, 3])
+      end
+    end
+
+    context "inputs are invalid" do
+      before { session[:user_id] = user.id }
+
+      it "redirects to the my queue page" do
+        post :update_queue, queue_items: [{ id: queue_item1.id, position: 2.5 }, { id: queue_item2.id, position: 3 }, { id: queue_item3.id, position: 1 }]
+        expect(response).to redirect_to my_queue_path
+      end
+
+      it "sets the flash[:danger] message" do
+        post :update_queue, queue_items: [{ id: queue_item1.id, position: 2.5 }, { id: queue_item2.id, position: 3 }, { id: queue_item3.id, position: 1 }]
+        expect(flash[:danger]).to_not be_blank
+      end
+      
+      it "does not reorder the queue items" do
+        post :update_queue, queue_items: [{ id: queue_item1.id, position: 2.5 }, { id: queue_item2.id, position: 3 }, { id: queue_item3.id, position: 1 }]
+        expect(user.queue_items).to eq([queue_item1, queue_item2, queue_item3])
+      end
+    end
+
+    context "user is not signed in" do
+      it "redirects to root_path" do
+        post :update_queue, queue_items: [{ id: queue_item1.id, position: 1 }]
+        expect(response).to redirect_to root_path
+      end
+    end
+
+    context "with queue items that do not belong to the signed in user" do
+      before { session[:user_id] = user.id }
+      let(:video4) { Fabricate(:video) }
+      let(:queue_item4) { Fabricate(:queue_item, position: 4, video_id: video4.id, user: Fabricate(:user)) }
+
+      it "does not reorder the queue items" do
+        post :update_queue, queue_items: [{ id: queue_item1.id, position: 2 }, { id: queue_item2.id, position: 3 }, { id: queue_item3.id, position: 4 }, { id: queue_item4.id, position: 1 }]
+        expect(queue_item4.reload.position).to eq(4)
+      end
+    end
+  end
+
 end

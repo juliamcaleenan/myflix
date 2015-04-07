@@ -9,6 +9,9 @@ class ReviewsController < ApplicationController
     if @review.save
       flash[:success] = "Your review has been created"
       redirect_to @video
+    elsif current_user.reviews.map(&:video_id).include?(@video.id)
+      flash[:danger] = "You can only review a video once"
+      redirect_to @video
     else
       @reviews = @video.reviews.reload
       render 'videos/show'
