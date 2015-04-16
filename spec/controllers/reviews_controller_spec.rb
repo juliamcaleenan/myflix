@@ -4,10 +4,10 @@ describe ReviewsController do
 
   describe "POST create" do
     let(:video) { Fabricate(:video) }
+
     context "input is valid" do
-      let(:user) { Fabricate(:user) }
       before do
-        session[:user_id] = user.id
+        set_current_user
         post :create, video_id: video.id, review: Fabricate.attributes_for(:review)
       end
 
@@ -20,7 +20,7 @@ describe ReviewsController do
       end
 
       it "creates a review associated with the signed in user" do
-        expect(Review.first.user).to eq(user)
+        expect(Review.first.user).to eq(current_user)
       end
 
       it "redirects to the video show page (for that video)" do
@@ -33,7 +33,7 @@ describe ReviewsController do
     end
 
     context "input is invalid" do
-      before { session[:user_id] = Fabricate(:user).id }
+      before { set_current_user }
 
       it "does not create a review" do
         post :create, video_id: video.id, review: { rating: 5 }
@@ -58,11 +58,8 @@ describe ReviewsController do
       end
     end
 
-    context "user is not signed in" do
-      it "redirects to root_path" do
-        post :create, video_id: video.id, review: Fabricate.attributes_for(:review)
-        expect(response).to redirect_to root_path
-      end
+    it_behaves_like "require_sign_in" do
+      let(:action) { post :create, video_id: video.id, review: Fabricate.attributes_for(:review) }
     end
   end
 end
